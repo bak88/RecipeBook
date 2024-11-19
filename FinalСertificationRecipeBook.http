@@ -1,0 +1,6 @@
+@FinalСertificationRecipeBook_HostAddress = http://localhost:5295
+
+GET {{FinalСertificationRecipeBook_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
