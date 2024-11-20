@@ -22,6 +22,26 @@ namespace FinalСertificationRecipeBook.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Один ко многим: User - Recipe
+            modelBuilder.Entity<Recipe>()
+                .HasOne(r => r.Author)
+                .WithMany(u => u.Recipes)
+                .HasForeignKey(r => r.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Один ко многим: Category - Recipe
+            modelBuilder.Entity<Recipe>()
+                .HasOne(r => r.Category)
+                .WithMany(c => c.Recipes)
+                .HasForeignKey(r => r.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Один ко многим: Recipe - Ingredient
+            modelBuilder.Entity<Ingredient>()
+                .HasOne(i => i.Recipe)
+                .WithMany(r => r.Ingredients)
+                .HasForeignKey(i => i.RecipeId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }
