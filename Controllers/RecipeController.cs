@@ -76,5 +76,60 @@ namespace FinalСertificationRecipeBook.Controllers
                                     recipe);
         }
 
+        // Метод для обновления существующего рецепта
+        // PUT: api/Recipe/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutRecipe(int id, Recipe recipe)
+        {
+            // Проверка на соответствие ID в параметре и теле запроса
+            if (id != recipe.Id)
+                return BadRequest("Recipe ID mismatch.");
+
+            // Помечаем сущность как измененную
+            _context.Entry(recipe).State = EntityState.Modified;
+
+            try
+            {
+                // Сохраняем изменения в базе данных
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // Проверка, существует ли рецепт с заданным ID
+                if (!_context.Recipes.Any(r => r.Id == id))
+                    return NotFound();
+
+                // Повторное выбрасывание исключения
+                throw;
+            }
+
+            // Возвращаем статус 204 (No Content) в случае успешного обновления
+            return NoContent();
+        }
+
+        // Метод для удаления рецепта по ID 
+        // DELETE: api/Recipe/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecipe(int id)
+        {
+            // Асинхронный поиск рецепта по ID
+            Recipe? recipe = await _context.Recipes.FindAsync(id);
+
+            // Если рецепт не найден, возвращаем статус 404 (Not Found)
+            if (recipe == null)
+                return NotFound();
+
+            // Удаляем найденный рецепт из контекста базы данных
+            _context.Recipes.Remove(recipe);
+
+            // Сохраняем изменения в базе данных
+            await _context.SaveChangesAsync();
+
+            // Возвращаем статус 204 (No Content) в случае успешного удаления
+            return NoContent();
+        }
+
+
+
     }
 }
