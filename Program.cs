@@ -1,11 +1,20 @@
 
+using FinalСertificationRecipeBook.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace FinalCertificationRecipeBook
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);           
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Добавьте строку подключения в конфигурации
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            // Добавьте DbContext в контейнер служб
+            builder.Services.AddDbContext<RecipeBookContext>(options => options.UseNpgsql(connectionString).UseLazyLoadingProxies());
 
             builder.Services.AddControllers();
             

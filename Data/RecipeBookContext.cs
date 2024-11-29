@@ -15,9 +15,7 @@ namespace FinalСertificationRecipeBook.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server = NINTENDO; Initial Catalog = RecipeBook; Trusted_Connection=True; TrustServerCertificate=True")
-                          .UseLazyLoadingProxies()
-                          .LogTo(Console.WriteLine);
+           
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,6 +41,7 @@ namespace FinalСertificationRecipeBook.Data
                 .HasForeignKey(i => i.RecipeId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
