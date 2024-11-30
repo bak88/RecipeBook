@@ -1,5 +1,6 @@
 
 using FinalСertificationRecipeBook.Data;
+using FinalСertificationRecipeBook.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinalCertificationRecipeBook
@@ -11,10 +12,13 @@ namespace FinalCertificationRecipeBook
             var builder = WebApplication.CreateBuilder(args);
 
             // Добавьте строку подключения в конфигурации
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             // Добавьте DbContext в контейнер служб
             builder.Services.AddDbContext<RecipeBookContext>(options => options.UseNpgsql(connectionString).UseLazyLoadingProxies());
+
+            // Регистрация репозиторий
+            builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 
             builder.Services.AddControllers();
             

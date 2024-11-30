@@ -1,5 +1,6 @@
 ﻿using FinalСertificationRecipeBook.Data;
 using FinalСertificationRecipeBook.Models;
+using FinalСertificationRecipeBook.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,32 +10,29 @@ namespace FinalСertificationRecipeBook.Controllers
     [ApiController]
     public class RecipeController : ControllerBase
     {
-        private readonly RecipeBookContext _context;
-        public RecipeController(RecipeBookContext context)
+        private readonly IRecipeRepository _recipeRepository;
+        public RecipeController(IRecipeRepository recipeRepository)
         {
-            _context = context;
+            _recipeRepository = recipeRepository;
         }
 
         // Метод для получения всех рецептов
         // GET: api/Recipe
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Recipe>>> GetAllRecipe()
+        public async Task<IActionResult> GetAllRecipes()
         {
-            List<Recipe> recipes = await _context.Recipes
-                                         .Include(r => r.Ingredients)
-                                         .ToListAsync();
+            IEnumerable<Recipe> recipes = await _recipeRepository.GetAllRecipesAsync();
+
             return Ok(recipes);
         }
 
         // Метод для получения рецепта по ID 
         // GET: api/Recipe/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipe(int id)
+        public async Task<IActionResult> GetRecipeById(int id)
         {
             // Ищем рецепт по ID и включаем ингредиенты
-            Recipe? recipe = await _context.Recipes
-                                       .Include(r => r.Ingredients)
-                                       .FirstOrDefaultAsync(r => r.Id == id);
+            Recipe? recipe = await _recipeRepository.GetRecipeByIdAsync(id);
 
             // Если рецепт не найден, возвращаем статус 404
             if (recipe == null)
@@ -47,64 +45,37 @@ namespace FinalСertificationRecipeBook.Controllers
         // Метод для добавления нового рецепта
         // POST: api/Recipe
         [HttpPost]
-        public async Task<ActionResult<Recipe>> PostRecipe(Recipe recipe)
+        public async Task<IActionResult> AddRecipe([FromBody] Recipe recipe)
         {
-            // Проверка на валидность входных данных
-            if (recipe == null)
-                return BadRequest("Recipe can't be null");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            // Проверка на существование обязательных полей
-            if (string.IsNullOrEmpty(recipe.Name))
-                return BadRequest("Recipe name can't be empty");
+            await _recipeRepository.AddRecipeAsync(recipe);
 
-            try
-            {
-                // Добавляем новый рецепт в контекст базы данных
-                _context.Recipes.Add(recipe);
-
-                // Сохраняем изменения в базе данных
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving recipe: {ex.Message}");
-                return StatusCode(500, "Internal server error.");
-            }
-
-            return CreatedAtAction( nameof(GetRecipe),
-                                    new { id = recipe.Id }, 
-                                    recipe);
+            return CreatedAtAction(nameof(GetRecipeById), new {id = recipe.Id, recipe});
         }
 
         // Метод для обновления существующего рецепта
         // PUT: api/Recipe/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRecipe(int id, Recipe recipe)
+        public async Task<IActionResult> UpdateRecipe(int id, [FromBody] Recipe recipe)
         {
-            // Проверка на соответствие ID в параметре и теле запроса
+            
             if (id != recipe.Id)
                 return BadRequest("Recipe ID mismatch.");
 
-            // Помечаем сущность как измененную
-            _context.Entry(recipe).State = EntityState.Modified;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            try
-            {
-                // Сохраняем изменения в базе данных
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                // Проверка, существует ли рецепт с заданным ID
-                if (!_context.Recipes.Any(r => r.Id == id))
-                    return NotFound();
+            Recipe existingRecipe = await _recipeRepository.GetRecipeByIdAsync(id);
 
-                // Повторное выбрасывание исключения
-                throw;
-            }
+            if (existingRecipe == null)
+                return NotFound();
 
-            // Возвращаем статус 204 (No Content) в случае успешного обновления
+            await _recipeRepository.UpdateRecipeAsync(recipe);
+
             return NoContent();
+
         }
 
         // Метод для удаления рецепта по ID 
@@ -113,19 +84,13 @@ namespace FinalСertificationRecipeBook.Controllers
         public async Task<IActionResult> DeleteRecipe(int id)
         {
             // Асинхронный поиск рецепта по ID
-            Recipe? recipe = await _context.Recipes.FindAsync(id);
+            Recipe? recipe = await _recipeRepository.GetRecipeByIdAsync(id);
 
             // Если рецепт не найден, возвращаем статус 404 (Not Found)
             if (recipe == null)
                 return NotFound();
 
-            // Удаляем найденный рецепт из контекста базы данных
-            _context.Recipes.Remove(recipe);
-
-            // Сохраняем изменения в базе данных
-            await _context.SaveChangesAsync();
-
-            // Возвращаем статус 204 (No Content) в случае успешного удаления
+            await _recipeRepository.DeleteRecipeAsync(id);
             return NoContent();
         }
 
