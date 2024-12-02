@@ -19,7 +19,7 @@ namespace FinalСertificationRecipeBook.Repositories
 
         public async Task DeleteRecipeAsync(int id)
         {
-            Recipe recipe = await _context.Recipes.FindAsync(id); 
+            Recipe? recipe = await _context.Recipes.FindAsync(id); 
 
             if (recipe != null) 
             { 

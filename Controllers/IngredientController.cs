@@ -1,5 +1,6 @@
 ﻿using FinalСertificationRecipeBook.Data;
 using FinalСertificationRecipeBook.Models;
+using FinalСertificationRecipeBook.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -12,94 +13,63 @@ namespace RecipeBook.Controllers
     [ApiController]
     public class IngredientController : ControllerBase
     {
-        private readonly RecipeBookContext _context;
+        private readonly IIngredientRepository _ingredientRepository;
 
-        public IngredientController(RecipeBookContext context)
+        public IngredientController(IIngredientRepository ingredientRepository)
         {
-            _context = context;
+            _ingredientRepository = ingredientRepository;
         }
 
         // GET: api/ingredient
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ingredient>>> GetAllIngredients()
+        public async Task<IActionResult> GetAllIngredients()
         {
-            return await _context.Ingredients.ToListAsync();
+            IEnumerable<Ingredient> ingredients = await _ingredientRepository.GetAllIngredientsAsync();
+            return Ok(ingredients);
         }
 
         // GET: api/ingredient/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Ingredient>> GetIngredient(int id)
+        public async Task<IActionResult> GetIngredientById(int id)
         {
-            var ingredient = await _context.Ingredients.FindAsync(id);
+            var ingredient = await _ingredientRepository.GetIngredientByIdAsync(id);
 
             if (ingredient == null)
-            {
                 return NotFound();
-            }
 
-            return ingredient;
+            return Ok(ingredient);
         }
 
         // POST: api/ingredient
         [HttpPost]
-        public async Task<ActionResult<Ingredient>> PostIngredient(Ingredient ingredient)
+        public async Task<IActionResult> AddIngredient(Ingredient ingredient)
         {
-            _context.Ingredients.Add(ingredient);
-            await _context.SaveChangesAsync();
+            _ingredientRepository.AddIngredientAsync(ingredient);
 
-            return CreatedAtAction("GetIngredient", new { id = ingredient.Id }, ingredient);
+            return CreatedAtAction(nameof(GetIngredientById), new { id = ingredient.Id }, ingredient);
         }
 
         // PUT: api/ingredient/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutIngredient(int id, Ingredient ingredient)
+        public async Task<IActionResult> UpdateIngredient(int id, Ingredient ingredient)
         {
             if (id != ingredient.Id)
-            {
                 return BadRequest();
-            }
 
-            _context.Entry(ingredient).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!IngredientExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _ingredientRepository.UpdateIngredientAsync(ingredient);
             return NoContent();
+
         }
 
         // DELETE: api/ingredient/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteIngredient(int id)
         {
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-
-            _context.Ingredients.Remove(ingredient);
-            await _context.SaveChangesAsync();
-
+            await _ingredientRepository.DeleteIngredientByIdAsync(id);
             return NoContent();
         }
 
-        private bool IngredientExists(int id)
-        {
-            return _context.Ingredients.Any(e => e.Id == id);
-        }
+
     }
 }
 
