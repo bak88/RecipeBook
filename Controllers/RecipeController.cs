@@ -10,55 +10,48 @@ namespace FinalСertificationRecipeBook.Controllers
     [ApiController]
     public class RecipeController : ControllerBase
     {
-        private readonly IRecipeRepository _recipeRepository;
-        public RecipeController(IRecipeRepository recipeRepository)
+        private readonly IGenericRepository<Recipe> _recipeRepository;
+        public RecipeController(IGenericRepository<Recipe> recipeRepository)
         {
             _recipeRepository = recipeRepository;
         }
+         
 
-        // Метод для получения всех рецептов
-        // GET: api/Recipe
         [HttpGet]
-        public async Task<IActionResult> GetAllRecipes()
+        public async Task<ActionResult> GetAllRecipes()
         {
-            IEnumerable<Recipe> recipes = await _recipeRepository.GetAllRecipesAsync();
+            IEnumerable<Recipe> recipes = await _recipeRepository.GetAllAsync();
 
             return Ok(recipes);
         }
 
-        // Метод для получения рецепта по ID 
-        // GET: api/Recipe/{id}
+        
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetRecipeById(int id)
-        {
-            // Ищем рецепт по ID и включаем ингредиенты
-            Recipe? recipe = await _recipeRepository.GetRecipeByIdAsync(id);
-
-            // Если рецепт не найден, возвращаем статус 404
+        public async Task<ActionResult> GetRecipeById(int id)
+        {            
+            Recipe? recipe = await _recipeRepository.GetByIdAsync(id);
+                        
             if (recipe == null)
                 return NotFound();
-
-            // Если рецепт найден, возвращаем его со статусом 200
+            
             return Ok(recipe);
         }
 
-        // Метод для добавления нового рецепта
-        // POST: api/Recipe
+        
         [HttpPost]
-        public async Task<IActionResult> AddRecipe([FromBody] Recipe recipe)
+        public async Task<ActionResult> AddRecipe([FromBody] Recipe recipe)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _recipeRepository.AddRecipeAsync(recipe);
+            await _recipeRepository.AddAsync(recipe);
 
             return CreatedAtAction(nameof(GetRecipeById), new {id = recipe.Id, recipe});
         }
 
-        // Метод для обновления существующего рецепта
-        // PUT: api/Recipe/{id}
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRecipe(int id, [FromBody] Recipe recipe)
+        public async Task<ActionResult> UpdateRecipe(int id, [FromBody] Recipe recipe)
         {
             
             if (id != recipe.Id)
@@ -67,30 +60,27 @@ namespace FinalСertificationRecipeBook.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            Recipe existingRecipe = await _recipeRepository.GetRecipeByIdAsync(id);
+            Recipe existingRecipe = await _recipeRepository.GetByIdAsync(id);
 
             if (existingRecipe == null)
                 return NotFound();
 
-            await _recipeRepository.UpdateRecipeAsync(recipe);
+            await _recipeRepository.UpdateAsync(recipe);
 
             return NoContent();
 
         }
 
-        // Метод для удаления рецепта по ID 
-        // DELETE: api/Recipe/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRecipe(int id)
-        {
-            // Асинхронный поиск рецепта по ID
-            Recipe? recipe = await _recipeRepository.GetRecipeByIdAsync(id);
 
-            // Если рецепт не найден, возвращаем статус 404 (Not Found)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteRecipe(int id)
+        {            
+            Recipe? recipe = await _recipeRepository.GetByIdAsync(id);
+                        
             if (recipe == null)
                 return NotFound();
 
-            await _recipeRepository.DeleteRecipeAsync(id);
+            await _recipeRepository.DeleteAsync(id);
             return NoContent();
         }
 

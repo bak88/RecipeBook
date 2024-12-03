@@ -44,7 +44,7 @@ namespace RecipeBook.Controllers
         [HttpPost]
         public async Task<ActionResult> AddIngredient(Ingredient ingredient)
         {
-            _ingredientRepository.AddAsync(ingredient);
+            await _ingredientRepository.AddAsync(ingredient);
 
             return CreatedAtAction(nameof(GetIngredientById), new { id = ingredient.Id }, ingredient);
         }

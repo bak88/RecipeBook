@@ -15,9 +15,8 @@ namespace FinalСertificationRecipeBook.Repositories
         public User Authenticate(LoginModel login)
         {
             if (_users.TryGetValue(login.Name, out var user) && VerifyPassword(login.Password, user.Password))
-            {
                 return user;
-            }
+
             return null;
         }
 
