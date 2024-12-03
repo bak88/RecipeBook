@@ -10,27 +10,25 @@ namespace FinalСertificationRecipeBook.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryRepository _categoryRepository;
-        public CategoryController(ICategoryRepository repository)
+        private readonly IGenericRepository<Category> _categoryRepository;
+        public CategoryController(IGenericRepository<Category> repository)
         {
             _categoryRepository = repository;
         }
 
-        // Метод для получения всех категорий 
-        // GET: api/Category
+        
         [HttpGet]
-        public async Task<IActionResult> GetAllCategories()
+        public async Task<ActionResult> GetAllCategories()
         {
-            IEnumerable<Category> categories = await _categoryRepository.GetAllCategoriesAsync();
+            IEnumerable<Category> categories = await _categoryRepository.GetAllAsync();
             return Ok(categories);
         }
 
-        // Метод для получения категории по ID 
-        // GET: api/Category/{id}
+        
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCategoryById(int id)
+        public async Task<ActionResult> GetCategoryById(int id)
         {
-            Category? category = await _categoryRepository.GetCategoryByIdAsync(id);
+            Category? category = await _categoryRepository.GetByIdAsync(id);
 
             if (category == null)
                 return NotFound();
@@ -38,34 +36,30 @@ namespace FinalСertificationRecipeBook.Controllers
             return Ok(category);
         }
 
-        // Метод для добавления новой категории
-        // POST: api/Category
+       
         [HttpPost]
-        public async Task<IActionResult> AddCategory(Category category)
+        public async Task<ActionResult> AddCategory(Category category)
         {
-            await _categoryRepository.AddCategoryAsync(category);
+            await _categoryRepository.AddAsync(category);
             return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
-
         }
 
-        // Метод для обновления существующей категории
-        // PUT: api/Category/{id}
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, Category category)
+        public async Task<ActionResult> UpdateCategory(int id, Category category)
         {
             if (id != category.Id)
                 return BadRequest("Category ID mismatch.");
 
-            await _categoryRepository.UpdateCategoryAsync(category); 
+            await _categoryRepository.UpdateAsync(category); 
             return NoContent();
         }
 
-        // Метод для удаления категории по ID 
-        // DELETE: api/Category/{id}
+        
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<ActionResult> DeleteCategory(int id)
         {
-            await _categoryRepository.DeleteCategoryAsync(id); 
+            await _categoryRepository.DeleteAsync(id); 
             return NoContent();
         }
 

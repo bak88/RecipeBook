@@ -13,26 +13,26 @@ namespace RecipeBook.Controllers
     [ApiController]
     public class IngredientController : ControllerBase
     {
-        private readonly IIngredientRepository _ingredientRepository;
+        private readonly IGenericRepository<Ingredient> _ingredientRepository;
 
-        public IngredientController(IIngredientRepository ingredientRepository)
+        public IngredientController(IGenericRepository<Ingredient> ingredientRepository)
         {
             _ingredientRepository = ingredientRepository;
         }
 
-        // GET: api/ingredient
+        
         [HttpGet]
-        public async Task<IActionResult> GetAllIngredients()
+        public async Task<ActionResult> GetAllIngredients()
         {
-            IEnumerable<Ingredient> ingredients = await _ingredientRepository.GetAllIngredientsAsync();
+            IEnumerable<Ingredient> ingredients = await _ingredientRepository.GetAllAsync();
             return Ok(ingredients);
         }
 
-        // GET: api/ingredient/5
+       
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetIngredientById(int id)
+        public async Task<ActionResult> GetIngredientById(int id)
         {
-            var ingredient = await _ingredientRepository.GetIngredientByIdAsync(id);
+            var ingredient = await _ingredientRepository.GetByIdAsync(id);
 
             if (ingredient == null)
                 return NotFound();
@@ -40,32 +40,32 @@ namespace RecipeBook.Controllers
             return Ok(ingredient);
         }
 
-        // POST: api/ingredient
+       
         [HttpPost]
-        public async Task<IActionResult> AddIngredient(Ingredient ingredient)
+        public async Task<ActionResult> AddIngredient(Ingredient ingredient)
         {
-            _ingredientRepository.AddIngredientAsync(ingredient);
+            _ingredientRepository.AddAsync(ingredient);
 
             return CreatedAtAction(nameof(GetIngredientById), new { id = ingredient.Id }, ingredient);
         }
 
-        // PUT: api/ingredient/5
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateIngredient(int id, Ingredient ingredient)
+        public async Task<ActionResult> UpdateIngredient(int id, Ingredient ingredient)
         {
             if (id != ingredient.Id)
                 return BadRequest();
 
-            await _ingredientRepository.UpdateIngredientAsync(ingredient);
+            await _ingredientRepository.UpdateAsync(ingredient);
             return NoContent();
 
         }
 
-        // DELETE: api/ingredient/5
+        
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteIngredient(int id)
+        public async Task<ActionResult> DeleteIngredient(int id)
         {
-            await _ingredientRepository.DeleteIngredientByIdAsync(id);
+            await _ingredientRepository.DeleteAsync(id);
             return NoContent();
         }
 

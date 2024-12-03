@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinalСertificationRecipeBook.Repositories
 {
-    public class IngredientRepository : IIngredientRepository
+    public class IngredientRepository : IGenericRepository<Ingredient>
     {
         private readonly RecipeBookContext _recipeBookContext;
 
@@ -12,28 +12,28 @@ namespace FinalСertificationRecipeBook.Repositories
         {
             _recipeBookContext = recipeBookContext;
         }
-        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync()
+        public async Task<IEnumerable<Ingredient>> GetAllAsync()
         {
             return await _recipeBookContext.Ingredients.ToListAsync();
         }
-        public async Task<Ingredient> GetIngredientByIdAsync(int id)
+        public async Task<Ingredient> GetByIdAsync(int id)
         {
             return await _recipeBookContext.Ingredients.FindAsync(id);
         }
 
-        public async Task AddIngredientAsync(Ingredient ingredient)
+        public async Task AddAsync(Ingredient ingredient)
         {
             _recipeBookContext.Ingredients.Add(ingredient);
             await _recipeBookContext.SaveChangesAsync();
         }
-        public async Task UpdateIngredientAsync(Ingredient ingredient)
+        public async Task UpdateAsync(Ingredient ingredient)
         {
             _recipeBookContext.Ingredients.Update(ingredient);
             await _recipeBookContext.SaveChangesAsync();
 
         }
 
-        public async Task DeleteIngredientByIdAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             Ingredient? ingredient = await _recipeBookContext.Ingredients.FindAsync(id);
 
